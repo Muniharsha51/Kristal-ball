@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kristal ball</title>
+</head>
+<body>
+   <script>
+
+    let input = {
+    "id": "SE1",
+    "data": 10,
+    "left": {
+        "id": "SE2",
+        "data": 12,
+        "left": {
+            "id": "SE4",
+            "data": 4,
+            "right": {
+                "id": "SE8",
+                "data": 9,
+                "left": {
+                    "id": "SE15",
+                    "data": 20
+                }
+            }
+        },
+        "right": {
+            "id": "SE5",
+            "data": 17,
+            "left": {
+                "id": "SE9",
+                "data": 10,
+                "left": {
+                    "id": "SE16",
+                    "data": 8,
+                    "right": {
+                        "id": "SE17",
+                        "data": 18
+                    }
+                }
+            },
+            "right": {
+                "id": "SE10",
+                "data": 11
+            }
+        }
+    },
+    "right": {
+        "id": "SE3",
+        "data": 7,
+        "left": {
+            "id": "SE6",
+            "data": 6,
+            "left": {
+                "id": "SE11",
+                "data": 18
+            },
+            "right": {
+                "id": "SE12",
+                "data": 2
+            }
+        },
+        "right": {
+            "id": "SE7",
+            "data": 3,
+            "left": {
+                "id": "SE13",
+                "data": 13
+            },
+            "right": {
+                "id": "SE14",
+                "data": 15
+            }
+        }
+    }
+};
+
+function lineWithHighestSales(root) {
+    let maxSales = 0;
+    let line = [];
+    
+    function dfs(node, currentLine, currentSales) {
+        if (!node) return;
+
+        currentLine.push(node.id);
+        currentSales += node.data;
+
+        if (!node.left && !node.right) { 
+            if (currentSales > maxSales) {
+                maxSales = currentSales;
+                line = [...currentLine];
+            }
+        } else {
+            dfs(node.left, currentLine, currentSales);
+            dfs(node.right, currentLine, currentSales);
+        }
+        
+        currentLine.pop();
+    }
+    
+    dfs(root, [], 0);
+    
+    return line;
+}
+
+
+function calculateBonus(line, data) {
+    const bonus = 3000000;
+    const efficiencyBonus = bonus * 0.25;
+    const salesBonus = bonus * 0.75;
+    
+    const totalSubordinates = line.reduce((acc, id) => acc + countSubordinates(data, id), 0);
+    const totalSales = line.reduce((acc, id) => acc + findSales(data, id), 0);
+    
+    return line.map(id => {
+        const subordinates = countSubordinates(data, id);
+        const sales = findSales(data, id);
+        
+        const efficiencyPart = (subordinates / totalSubordinates) * efficiencyBonus;
+        const salesPart = (sales / totalSales) * salesBonus;
+        
+        return {
+            id,
+            bonus: Math.round(efficiencyPart + salesPart)
+        };
+    });
+}
+
+
+function countSubordinates(node, id) {
+    function count(node) {
+        if (!node) return 0;
+        return 1 + count(node.left) + count(node.right);
+    }
+    
+    function findNode(node, id) {
+        if (!node) return null;
+        if (node.id === id) return node;
+        return findNode(node.left, id) || findNode(node.right, id);
+    }
+    
+    const targetNode = findNode(node, id);
+    return targetNode ? count(targetNode) - 1 : 0;
+}
+
+
+function findSales(node, id) {
+    if (!node) return 0;
+    if (node.id === id) return node.data;
+    return findSales(node.left, id) + findSales(node.right, id);
+}
+
+let highestSalesLine = lineWithHighestSales(input);
+
+let bonusDistribution = calculateBonus(highestSalesLine, input);
+
+var expectedLine = [
+    {"id": "SE1", "bonus": 550000},
+    {"id": "SE2", "bonus": 560000},
+    {"id": "SE5", "bonus": 660000},
+    {"id": "SE9", "bonus": 400000},
+    {"id": "SE16", "bonus": 290000},
+    {"id": "SE17", "bonus": 540000}
+];
+console.log("Expected Result: " + JSON.stringify(expectedLine));//it shows output in  console tab
+document.write("Expected Result: " + JSON.stringify(expectedLine)) //it shows output in document
+
+// console.log("Cal Results: " + JSON.stringify(bonusDistribution));
+// this output is Calculated results as the bonus division
+   </script>
+
+</body>
+</html>
